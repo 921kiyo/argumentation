@@ -2,66 +2,121 @@ argument([a,b,c,d,e,f]).
 % attacks([(a,b),(b,c),(a,a)]).
 attacks([[a,b],[c,b],[c,d],[d,c], [d,e], [e,e]]).
 
-conflict_free(C):- check_alive(C), findall(Res ,perm(C, Res), List),
-                   check_conflict(C, List).
 conflict_free([]).
 
+conflict_free(C):- 
+	check_alive(C), 
+	findall(Res ,perm(C, Res), List),
+        check_conflict(C, List).
+
+
 check_alive([]).
-check_alive([H|T]):- argument(List), member(H, List), check_alive(T).
+
+check_alive([H|T]):- 
+	argument(List), 
+	member(H, List), 
+	check_alive(T).
+
 
 check_conflict(_, []).
+
 check_conflict(C, [H|T]):-
-  attacks(List),
-  \+(member(H, List)), check_conflict(C, T).
+	attacks(List),
+	\+(member(H, List)), 
+	check_conflict(C, T).
 
 
 perm([A], [A,A]).
-perm(List, Result):- length(List, Len), Len > 1, perm_acc(List, Result, 2).
-perm_acc(List, [], 0).
+
+perm(List, Result):- 
+	length(List, Len), 
+	Len > 1, 
+	perm_acc(List, Result, 2).
+
+perm_acc(_, [], 0).
 
 perm_acc(List,[H|Perm], C):-
-  C > 0,
-  NewC is C -1,
-  NewC is C -1, delete(H,List,Rest),perm_acc(Rest,Perm,NewC).
+	C > 0,
+	NewC is C -1,
+	delete(H,List,Rest),
+	perm_acc(Rest,Perm,NewC).
 
-perm(List, [X,X]):- length(List, Len), Len > 1, member(X, List).
+perm(List, [X,X]):- 
+	length(List, Len), 
+	Len > 1, 
+	member(X, List).
 
 delete(X,[X|T],T).
-delete(X,[H|T],[H|NT]):-delete(X,T,NT).
+
+delete(X,[H|T],[H|NT]):-
+	delete(X,T,NT).
 
 
-admissible(C):- conflict_free(C),
-                findall(Res , attacking_list(C, Res), List),
-                % print(List),nl,
-                findall(Res , defending_list(C, List), List2),
-                print(List2),nl.
-                % check_admissible(C, List2).
+% admiss(C): suceeds if C is an admissible (set of) argument(s).
 
-defending_list(L, Res):- print(L), nl, print(Res), nl, defending_list(L, Res, []).
-defending_list([], Acc, Acc):- print("Acc"), print(Acc),nl.
+admiss(C):-
+	conflict_free(C),
+        attackers_list(C, Attackers),
+        findall(X, (attackers_list(Attackers, Defenders), member(X, Defenders), member(X, C)), Counters),
+	length(Attackers, Att_len),
+	length(Counters, Counter_len),
+	Counter_len >= Att_len.
+
+% attackers_list(Def, Att): where Att is a list of the arguments which are attacking 
+% elements of the list, Def (defendents). Uses auxillary predicate 
+% get_attackers(Def, Att, Acc): which recurses through the defenders and accumulates
+% the attackers for each defendent.
+
+attackers_list(Def, Att):- 
+	get_attackers(Def, Att, []).
+
+get_attackers([], Acc, Acc).
+
+get_attackers([H|T], Att, Acc):-
+	attacks(Attackers),
+	findall(X, member([X, H], Attackers), L),
+	append(Acc, L, NewAcc),
+	get_attackers(T, Att, NewAcc).
+
+
+
+
+
+
+admissible(C):- 
+	conflict_free(C),
+        findall(Res , attacking_list(C, Res), List),
+						% print(List),nl,
+        findall(Res , defending_list(C, List), List2).
+        %print(List2),nl.
+						% check_admissible(C, List2).
+
+defending_list(L, Res):-
+	defending_list(L, Res, []).
+defending_list([], Acc, Acc).
 
 defending_list([H|T], [[H,X]|Res], Acc):-
-    attacks(List),
-    member([H,X], List),
-    % member(D, [H|T]),
-    % member(A, Res),
-    % member([D, A], List),
-    print(H),nl,
-    print(Res),nl,
-    % print(H),nl,
-    % print(T),nl,
-    % member([H, X], List),
-    % append(Acc, [X], NewAcc),
+	attacks(List),
+	member([H,X], List),
+						% member(D, [H|T]),
+						% member(A, Res),
+						% member([D, A], List),
+%	print(H),nl,
+	%print(Res),nl,
+						% print(H),nl,
+						% print(T),nl,
+						% member([H, X], List),
+						% append(Acc, [X], NewAcc),
     defending_list(T, Res, Acc).
 
 defending_list([H|T], [[H2,X]|Res], Acc):-
-    attacks(List),
+	attacks(List),
+	
+	\+(member([H2,X], List)),
+	defending_list(T, Res, Acc).
 
-    \+(member([H2,X], List)),
-    defending_list(T, Res, Acc).
 
-
-% defending_list([H|T], [[H2,X]|Res], Acc):-
+						% defending_list([H|T], [[H2,X]|Res], Acc):-
 %     H \= H2,
 %     append(Acc, X, NewAcc),
 %     defending_list(T, Res, NewAcc).
