@@ -1,6 +1,12 @@
-argument([a,b,c,d,e,f]).
+%argument([a,b,c,d,e,f]).
 % attacks([(a,b),(b,c),(a,a)]).
-attacks([[a,b],[c,b],[c,d],[d,c], [d,e], [e,e]]).
+%attacks([[a,b],[c,b],[c,d],[d,c], [d,e], [e,e]]).
+
+argument([a,b,c,d,e,f,g,h,i,j,k,l,m,p]).
+attacks([[h,e],[e,b],[d,e],[d,b],[d,a],[h,a],[h,p],[p,q],[n,p],[n,f],
+	 [i,n],[j,n],[i,j],[j,i],[i,e],[p,c],[p,d],[c,a],[p,l],[l,m],
+	 [m,k],[k,l],[m,c],[g,d],[g,p]]).
+
 
 conflict_free([]).
 
@@ -67,6 +73,9 @@ admiss(C):-
 % get_attackers(Def, Att, Acc): which recurses through the defenders and accumulates
 % the attackers for each defendent.
 
+
+% what if setof fails, what if there is no attackers etc.
+
 attackers_list(Def, Att):- 
 	get_attackers(Def, Att, []).
 
@@ -78,69 +87,41 @@ get_attackers([H|T], Att, Acc):-
 	append(Acc, L, NewAcc),
 	get_attackers(T, Att, NewAcc).
 
+grounded(C):-
+	attacks(Attackers),
+	argument(Args),	
+	findall(X, (member(X, Args), attackers_list([X], Att), length(Att, Att_len), Att_len == 0), Not_attacked),
+	recurse(Not_attacked, Grounded_exts),
+	append(Not_attacked, Grounded_exts, C).	
 
+recurse(Not_attacked, Grounded_exts):-
+	recurse(Not_attacked, Grounded_exts, [], [],X).
 
+recurse([], Grounded_exts, Grounded_exts, A, A).
 
+recurse([H|T], Grounded_exts, T_in, T_out, Z):-
+	attacks(Attackers),
+	argument(Args),
+	findall(Attacked_by, member([H, Attacked_by], Attackers), Out),
+	findall(I, (member(Attacked_by, Out), member([Attacked_by, I], Attackers)), In),
+	append(T_out, Out, New_out),
+	update_in(In, New_out, New_in),	
+	recurse(T, Grounded_exts, New_in, New_out, Z).
 
+update_in(In, New_out, New_in):-
+	update_in(In, New_out, New_in, []).
 
-admissible(C):- 
-	conflict_free(C),
-        findall(Res , attacking_list(C, Res), List),
-						% print(List),nl,
-        findall(Res , defending_list(C, List), List2).
-        %print(List2),nl.
-						% check_admissible(C, List2).
+update_in([], _, New_in, New_in).
 
-defending_list(L, Res):-
-	defending_list(L, Res, []).
-defending_list([], Acc, Acc).
+update_in([H|T], Out, X, T2):-
+	attackers_list([H], Attackers),
+	sort(Attackers, Attackers_sort),
+	(
+	 setof(Att, (member(Att, Attackers_sort), member(Att, Out)), Attackers2),
+	 \+(member(H, Out)), append(Attackers_sort, [], Attackers2) -> NewT2 = [H|T2] ;
+	NewT2 = T2),
+	update_in(T, Out, X, NewT2).
 
-defending_list([H|T], [[H,X]|Res], Acc):-
-	attacks(List),
-	member([H,X], List),
-						% member(D, [H|T]),
-						% member(A, Res),
-						% member([D, A], List),
-%	print(H),nl,
-	%print(Res),nl,
-						% print(H),nl,
-						% print(T),nl,
-						% member([H, X], List),
-						% append(Acc, [X], NewAcc),
-    defending_list(T, Res, Acc).
-
-defending_list([H|T], [[H2,X]|Res], Acc):-
-	attacks(List),
-	
-	\+(member([H2,X], List)),
-	defending_list(T, Res, Acc).
-
-
-						% defending_list([H|T], [[H2,X]|Res], Acc):-
-%     H \= H2,
-%     append(Acc, X, NewAcc),
-%     defending_list(T, Res, NewAcc).
-
-
-attacking_list(L, Res):- attacking_list(L, Res, []).
-attacking_list([], Acc, Acc).
-
-attacking_list([H|T], Res, Acc):-
-    attacks(List),
-    member([X, H], List),
-    % print(X),nl,
-    % print(Acc),nl,
-    append(Acc, [X], NewAcc),
-    % print(NewAcc),nl,
-    attacking_list(T, Res, NewAcc).
-
-check_admissible(_, []).
-check_admissible(C, [[Attacker, Defender]|T]):-
-  attacks(List),
-  \+(member([Attacker, Defender], List)),
-  member(Attacker, C),
-  member(Defender, C),
-  check_admissible(C, T).
 
 
 % Edge cases
