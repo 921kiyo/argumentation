@@ -87,7 +87,6 @@ recurse(Arg, Score, _):-
 	base_func(Score1, Score2, Score),	
 	member(A, Attackers).
 
-
 recurse(Arg, Score, Acc):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 	length(Attackers, Attck_length),
@@ -96,7 +95,7 @@ recurse(Arg, Score, Acc):-
 	go_in_twos(Attackers_Score, Acc),
 	Score is Acc.
 
-go_in_twos([Final_score], Final_score)
+go_in_twos([Final_score], Final_score).
 
 go_in_twos([Att_one, Att_two|T], Acc):-
 	base_func(Att_one, Att_two, Score),
