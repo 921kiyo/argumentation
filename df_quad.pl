@@ -6,11 +6,13 @@ argument(a3).
 argument(a4).
 argument(a5).
 argument(a6).
-argument(a7).
+% argument(a7).
 
 % relationships
 
-supports(a7, a2).
+% If you uncomment this, DF Score should be 0.265625
+% If you don't include this, DF score should be 0.390625
+% supports(a7, a2).
 
 attacks(a5,a3).
 attacks(a6,a3).
@@ -26,9 +28,7 @@ base(a3, 0.5).
 base(a4, 0.5).
 base(a5, 0.5).
 base(a6, 0.5).
-base(a7, 0.5).
-% base(a5, 0.5).
-% base(b, 0.5).
+% base(a7, 0.5).
 
 
 /*
@@ -37,10 +37,10 @@ TODO: Check edge cases
 1. If no attacks/2 is provided
 2. If no supports/2 is provided
 3. When there are more supporters than attackers
+4. If you include an argument and do not add relationship(attacks, supporters), this doesn't work
 4. Haven't tested different base score
 5. Very complicated trees (we can do this using http://www.arganddec.com/)
 */
-
 
 /*
 comb_func(V0, Va, Vs, C):-
@@ -59,8 +59,7 @@ comb_func(V0, Va, Vs, C):-
 base_func(V1, V2, NewScore):-
 	NewScore is (V1 + ((1 - V1)* V2)).
 
-
-% This works when there is only supporters
+/* This works when there is only attackers
 
 strength(Arg, BS):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
@@ -74,6 +73,9 @@ strength(Arg, TotalScore):-
 	base(Arg, BS),
 	comb_func(BS, Score, 0, TotalScore).
 
+*/
+
+
 % % When Arg has no child
 % strength(Arg, BS):-
 % 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
@@ -86,7 +88,6 @@ strength(Arg, TotalScore):-
 % strength(Arg, TotalScore):-
 % 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 % 	length(Attackers, 0),
-%
 % 	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
 % 	length(Supporters, Supp_len),
 % 	Supp_len > 0,
@@ -116,12 +117,12 @@ strength(Arg, TotalScore):-
 % 	length(Supporters, Supp_len),
 % 	Supp_len > 0,
 % 	strength_aggregation(Arg, Supporters, SuppScore),
-% 	% print(attscore), print(AttScore),nl,
-% 	% print(suppscore), print(SuppScore),nl,
 % 	base(Arg, BS),
 % 	comb_func(BS, AttScore, Supp, TotalScore).
 
-strength_aggregation(Arg, Attackers, Score):- strength_aggregation(Arg, Attackers, Score, []).
+% Strength aggregation function accumulator
+% Children: list of attackers or supporters children associated with Arg.
+strength_aggregation(Arg, Children, Score):- strength_aggregation(Arg, Children, Score, []).
 
 strength_aggregation(Arg, [], 0, ScoreList):-
 		length(ScoreList, 0).
@@ -145,5 +146,6 @@ strength_aggregation(Arg, [], 0, ScoreList):-
 		length(ScoreList, 0).
 
 strength_aggregation(Arg, [Attacker|Rest], S, Acc):-
+    % TODO This is where the recursion takes place, but it doesn't work when multiple attackers and supporters are provided.
 		strength(Attacker, Score),
 		strength_aggregation(Arg, Rest, S, [Score|Acc]).
