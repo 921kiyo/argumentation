@@ -93,7 +93,8 @@ recurse(Arg, Score, Acc):-
 	length(Attackers, Attck_length),
 	Attck_length > 2,
 	findall(Att_Score, (argument(Att), attacks(Att,Arg), base(Arg, Att_Score)), Attackers_Score),
-	go_in_twos(Attackers_Score, Acc).
+	go_in_twos(Attackers_Score, Acc),
+	Score is Acc.
 
 go_in_twos([Final_score], Final_score)
 
