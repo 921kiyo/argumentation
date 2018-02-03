@@ -60,24 +60,24 @@ base_func(V1, V2, NewScore):-
 
 strength(Arg, FinalScore):-
 	base(Arg, BS),
-	recurse(Arg, Attackers_Score),
+	recurse(Arg, Attackers_Score, []),
 	print(fdsa), print(Attackers_Score),
 	comb_func(BS, Attackers_Score, 0, FinalScore).
 
-recurse(Arg, Score):-
+recurse(Arg, Score, _):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 	length(Attackers, Attck_length),
 	Attck_length == 0,
 	Score is 0.
 
-recurse(Arg, Score):-
+recurse(Arg, Score, _):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 	length(Attackers, Attck_length),
 	Attck_length == 1,
 	member(A, Attackers),
 	base(A, Score).
 
-recurse(Arg, Score):-
+recurse(Arg, Score, _):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 	length(Attackers, Attck_length),
 	Attck_length == 2,
@@ -88,21 +88,23 @@ recurse(Arg, Score):-
 	member(A, Attackers).
 
 
-recurse(Arg, Score):-
+recurse(Arg, Score, Acc):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 	length(Attackers, Attck_length),
 	Attck_length > 2,
-	member(A, Attackers),
-	print(score), print(Score),nl,
-	N > 2,
-	N1 is N - 1,
-	base_func(Score1, Score2, NewScore),
-	append([NewScore], T, NewList),
-        aggreg_func(N1,NewList, Temp),
-	Score is Temp.
-	recurse(A, AttackScore),
-	print(Attackers_Score),nl,
-	aggreg_func(Attck_length, Attackers_Score, AttackScore).
+	findall(Att_Score, (argument(Att), attacks(Att,Arg), base(Arg, Att_Score)), Attackers_Score),
+	go_in_twos(Attackers_Score, Acc).
+
+go_in_twos([Final_score], Final_score)
+
+go_in_twos([Att_one, Att_two|T], Acc):-
+	base_func(Att_one, Att_two, Score),
+	go_in_twos([Score|T], Acc).
+
+
+
+
+
 
 
 /*
