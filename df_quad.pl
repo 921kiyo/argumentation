@@ -6,6 +6,7 @@ argument(a3).
 argument(a4).
 argument(a5).
 argument(a6).
+% Uncomment this if you want to include a supporter
 % argument(a7).
 
 % relationships
@@ -28,6 +29,7 @@ base(a3, 0.5).
 base(a4, 0.5).
 base(a5, 0.5).
 base(a6, 0.5).
+% Uncomment this if you want to include a supporter
 % base(a7, 0.5).
 
 
@@ -59,6 +61,7 @@ comb_func(V0, Va, Vs, C):-
 base_func(V1, V2, NewScore):-
 	NewScore is (V1 + ((1 - V1)* V2)).
 
+
 /* This works when there is only attackers
 
 strength(Arg, BS):-
@@ -76,49 +79,49 @@ strength(Arg, TotalScore):-
 */
 
 
-% % When Arg has no child
-% strength(Arg, BS):-
-% 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
-% 	length(Attackers, 0),
-% 	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
-% 	length(Supporters, 0),
-% 	base(Arg, BS).
-%
-% % When Arg has only supporter children and no attackers
-% strength(Arg, TotalScore):-
-% 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
-% 	length(Attackers, 0),
-% 	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
-% 	length(Supporters, Supp_len),
-% 	Supp_len > 0,
-% 	strength_aggregation(Arg, Supporters, SuppScore),
-% 	base(Arg, BS),
-% 	comb_func(BS, 0, SuppScore, TotalScore).
-%
-% % When Arg has only attacker children and no supporters
-% strength(Arg, TotalScore):-
-% 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
-% 	length(Attackers, Att_len),
-% 	Att_len > 0,
-% 	strength_aggregation(Arg, Attackers, AttScore),
-%
-% 	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
-% 	length(Supporters, 0),
-% 	base(Arg, BS),
-% 	comb_func(BS, AttScore, 0, TotalScore).
-%
-% % When Arg has both attacker and supporter children
-% strength(Arg, TotalScore):-
-% 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
-% 	length(Attackers, Att_len),
-% 	Att_len > 0,
-% 	strength_aggregation(Arg, Attackers, AttScore),
-% 	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
-% 	length(Supporters, Supp_len),
-% 	Supp_len > 0,
-% 	strength_aggregation(Arg, Supporters, SuppScore),
-% 	base(Arg, BS),
-% 	comb_func(BS, AttScore, Supp, TotalScore).
+% When Arg has no child
+strength(Arg, BS):-
+	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
+	length(Attackers, 0),
+	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
+	length(Supporters, 0),
+	base(Arg, BS).
+
+% When Arg has only supporter children and no attackers
+strength(Arg, TotalScore):-
+	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
+	length(Attackers, 0),
+	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
+	length(Supporters, Supp_len),
+	Supp_len > 0,
+	strength_aggregation(Arg, Supporters, SuppScore),
+	base(Arg, BS),
+	comb_func(BS, 0, SuppScore, TotalScore).
+
+% When Arg has only attacker children and no supporters
+strength(Arg, TotalScore):-
+	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
+	length(Attackers, Att_len),
+	Att_len > 0,
+	strength_aggregation(Arg, Attackers, AttScore),
+
+	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
+	length(Supporters, 0),
+	base(Arg, BS),
+	comb_func(BS, AttScore, 0, TotalScore).
+
+% When Arg has both attacker and supporter children
+strength(Arg, TotalScore):-
+	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
+	length(Attackers, Att_len),
+	Att_len > 0,
+	strength_aggregation(Arg, Attackers, AttScore),
+	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
+	length(Supporters, Supp_len),
+	Supp_len > 0,
+	strength_aggregation(Arg, Supporters, SuppScore),
+	base(Arg, BS),
+	comb_func(BS, AttScore, Supp, TotalScore).
 
 % Strength aggregation function accumulator
 % Children: list of attackers or supporters children associated with Arg.
