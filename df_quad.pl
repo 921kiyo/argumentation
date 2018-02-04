@@ -6,14 +6,13 @@ argument(a3).
 argument(a4).
 argument(a5).
 argument(a6).
-% Uncomment this if you want to include a supporter
-% argument(a7).
+argument(a7).
+argument(a8).
 
 % relationships
 
-% If you uncomment this, DF Score should be 0.265625
-% If you don't include this, DF score should be 0.390625
-% supports(a7, a2).
+supports(a7, a2).
+supports(a8, a4).
 
 attacks(a5,a3).
 attacks(a6,a3).
@@ -29,19 +28,30 @@ base(a3, 0.5).
 base(a4, 0.5).
 base(a5, 0.5).
 base(a6, 0.5).
-% Uncomment this if you want to include a supporter
-% base(a7, 0.5).
+base(a7, 0.5).
+base(a8, 0.5).
 
 
 /*
-TODO: Check edge cases
+TODO: Tests/Issues
 
 1. If no attacks/2 is provided
 2. If no supports/2 is provided
 3. When there are more supporters than attackers
-4. If you include an argument and do not add relationship(attacks, supporters), this doesn't work
 4. Haven't tested different base score
 5. Very complicated trees (we can do this using http://www.arganddec.com/)
+
+TODO
+6: refactoring
+7: Comments
+
+TODO: Minor issues
+
+1. If you look at strength predicate, there are lots of redundant code, so it might be worth
+   considering some refactoring (e.g conditional steatement etc).
+2. If you trace it, it goes through many steps (800 steps), mainly because of findall
+   and non-tail recursion. While the description tells us to avoid "obvious inefficiency",
+	 we could ask them whey they mean by that.
 */
 
 /*
@@ -60,23 +70,6 @@ comb_func(V0, Va, Vs, C):-
 
 base_func(V1, V2, NewScore):-
 	NewScore is (V1 + ((1 - V1)* V2)).
-
-
-/* This works when there is only attackers
-
-strength(Arg, BS):-
-	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
-	length(Attackers, 0),
-	base(Arg, BS).
-strength(Arg, TotalScore):-
-	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
-	length(Attackers, Att_len),
-	Att_len > 0,
-	strength_aggregation(Arg, Attackers, Score),
-	base(Arg, BS),
-	comb_func(BS, Score, 0, TotalScore).
-
-*/
 
 
 % When Arg has no child
@@ -121,7 +114,7 @@ strength(Arg, TotalScore):-
 	Supp_len > 0,
 	strength_aggregation(Arg, Supporters, SuppScore),
 	base(Arg, BS),
-	comb_func(BS, AttScore, Supp, TotalScore).
+	comb_func(BS, AttScore, SuppScore, TotalScore).
 
 % Strength aggregation function accumulator
 % Children: list of attackers or supporters children associated with Arg.
