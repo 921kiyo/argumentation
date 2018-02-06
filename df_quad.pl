@@ -42,8 +42,9 @@ TODO: Tests/Issues
 5. Very complicated trees (we can do this using http://www.arganddec.com/)
 
 TODO
-6: refactoring
+6: refactoring, better variable/predicate names
 7: Comments
+8: Singleton variables
 
 TODO: Minor issues
 
