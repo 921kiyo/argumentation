@@ -30,10 +30,10 @@ get_attackers([H|T], Att, Acc):-
 grounded(C):-
 	findall([X,Y], attacks(X,Y), Attackers),
 	findall(X, argument(X), Args),
-	print(Args),nl,
 	findall(X, (member(X, Args), attackers_list([X], Att), length(Att, Att_len), Att_len == 0), Not_attacked),
 	recurse(Not_attacked, Grounded_exts),
-	append(Not_attacked, Grounded_exts, C).
+	append(Not_attacked, Grounded_exts, List),
+	member(C, List).
 
 recurse(Not_attacked, Grounded_exts):-
 	recurse(Not_attacked, Grounded_exts, [], [],X).
