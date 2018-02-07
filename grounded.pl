@@ -1,8 +1,52 @@
-% argument([a,b,c,d,e,f,g,h,i,j,k,l,m,p]).
-% attacks([[h,e],[e,b],[d,e],[d,b],[d,a],[h,a],[h,p],[p,q],[n,p],[n,f],
-% 	 [i,n],[j,n],[i,j],[j,i],[i,e],[p,c],[p,d],[c,a],[p,l],[l,m],
-% 	 [m,k],[k,l],[m,c],[g,d],[g,p]]).
 
+% Complicated version
+/*
+argument(a).
+argument(b).
+argument(c).
+argument(d).
+argument(e).
+argument(f).
+argument(g).
+argument(h).
+argument(i).
+argument(j).
+argument(k).
+argument(l).
+argument(m).
+argument(n).
+argument(p).
+
+attacks(h,e).
+attacks(e,b).
+attacks(d,e).
+attacks(d,b).
+attacks(d,a).
+attacks(h,a).
+attacks(h,p).
+attacks(p,q).
+attacks(n,p).
+attacks(n,f).
+attacks(i,n).
+attacks(j,n).
+attacks(n,p).
+attacks(n,f).
+attacks(i,j).
+attacks(j,i).
+attacks(i,e).
+attacks(p,c).
+attacks(p,d).
+attacks(c,a).
+attacks(p,l).
+attacks(l,m).
+attacks(m,k).
+attacks(k,l).
+attacks(m,c).
+attacks(g,d).
+attacks(g,p).
+*/
+
+% Easy version
 % argument(a).
 % argument(b).
 % argument(c).
@@ -15,6 +59,20 @@
 % attacks(d,c).
 % attacks(d,e).
 % attacks(e,e).
+
+% failed on LabTS
+argument(a).
+argument(b).
+argument(c).
+argument(d).
+argument(e).
+argument(f).
+
+attacks(b,a).
+attacks(d,c).
+attacks(c,a).
+attacks(e,d).
+attacks(f,b).
 
 attackers_list(Def, Att):-
 	get_attackers(Def, Att, []).
@@ -32,6 +90,7 @@ grounded(C):-
 	findall(X, argument(X), Args),
 	findall(X, (member(X, Args), attackers_list([X], Att), length(Att, Att_len), Att_len == 0), Not_attacked),
 	recurse(Not_attacked, Grounded_exts),
+	print(Grounded_exts),nl.
 	append(Not_attacked, Grounded_exts, List),
 	member(C, List).
 
@@ -40,6 +99,8 @@ recurse(Not_attacked, Grounded_exts):-
 
 recurse([], Grounded_exts, Grounded_exts, A, A).
 
+% This doesn't make sense, because [H|T] is only the nodes that are not being attacked,
+% But surely we want to do recursion more than just the number of these nodes right?
 recurse([H|T], Grounded_exts, T_in, T_out, Z):-
 	findall([X,Y], attacks(X,Y), Attackers),
 	findall(X, argument(X), Args),
