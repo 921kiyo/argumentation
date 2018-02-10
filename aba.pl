@@ -85,13 +85,11 @@ not_inst(Var):-
   \+(\+(Var=0)),
   \+(\+(Var=1)).
 
-
-
 attacks((C1, X1), (C2, X2)):-
 	argument((C1, X1)),
 	% print(C1),nl,
 	contrary(C2, C1),
 	myAsm(C2),
-	argument(X2, [C2]).
+	argument((X2, [C2])).
 	% myRule(C2, [Attacker|Y]),
 	% contrary(Attacker, C1).
