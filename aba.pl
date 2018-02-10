@@ -6,14 +6,20 @@ myRule(p, [b]).
 myRule(p, []).
 
 
-% LabTS test 3
+% LabTS test 3 for argument/1
+% LabTS test 1,2 for attack/2
 % argument((z, X)).
+
 % myAsm(a).
 % myAsm(b).
 % myAsm(c).
 % myRule(x,[]).
 % myRule(y,[b]).
 % myRule(z,[a, p]).
+% contrary(a, x).
+% contrary(b, y).
+% contrary(c, z).
+
 
 % Examples in the paper
 % myAsm(a).
@@ -87,9 +93,12 @@ not_inst(Var):-
 
 attacks((C1, X1), (C2, X2)):-
 	argument((C1, X1)),
-	% print(C1),nl,
-	contrary(C2, C1),
-	myAsm(C2),
-	argument((X2, [C2])).
-	% myRule(C2, [Attacker|Y]),
-	% contrary(Attacker, C1).
+	argument((C2, X2)),
+	contrary(A, C1),
+	member(A, X2).
+
+attacks((C1, X1), (C2, X2)):-
+	argument((C1, X1)),
+	argument((C2, X2)),
+	contrary(C1, A),
+	member(A, X2).
