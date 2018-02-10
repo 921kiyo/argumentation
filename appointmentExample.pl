@@ -1,3 +1,6 @@
+:- [aba].
+:- [grounded].
+
 myAsm(free6(a)).
 myAsm(free8(a)).
 myAsm(free6(b)).

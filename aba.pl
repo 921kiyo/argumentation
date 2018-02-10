@@ -1,9 +1,9 @@
 % Examples in the question
-myAsm(a).
-myAsm(b).
-contrary(a, p).
-myRule(p, [b]).
-myRule(p, []).
+% myAsm(a).
+% myAsm(b).
+% contrary(a, p).
+% myRule(p, [b]).
+% myRule(p, []).
 
 
 % LabTS test 3 for argument/1
@@ -38,44 +38,13 @@ myRule(p, []).
 argument((C, [C])):-
 	myAsm(C).
 
-% If C is NOT an assumption, check all supports
-argument((C, Res)):-
-	\+(myAsm(C)),
-	myRule(C, List),
-	length(List, Len),
-	Len > 0,
-	check_support(List),
-	get_assumption(List, Res).
-
-get_assumption([], []).
-get_assumption([H|T1], [H|T2]):-
-	myAsm(H),
-	get_assumption(T1,T2).
-
-get_assumption([H1|T1], T2):-
-	\+(myAsm(H1)),
-	member(H1, List),
-	get_assumption(C, T1,T2).
-
-check_support([]).
-
-check_support([H|T]):-
-	myAsm(H),
-	check_support(T).
-
-check_support([H|T]):-
-	\+(myAsm(H)),
-	myRule(H, List),
-	check_support(List),
-	check_support(T).
-
-% If C is not an assumption, and empty support, return empty set.
+% If C is not an assumption, and support is empty, return empty set.
 argument((C, [])):-
 	\+(myAsm(C)),
 	myRule(C, List),
 	length(List, 0).
 
-% % X has to be instantiated
+% % X has to be instantiated. If not, this predicate will be ignored
 argument((C, X)):-
 	\+(not_inst(X)),
 	check_support2(X, C),
@@ -91,6 +60,43 @@ not_inst(Var):-
   \+(\+(Var=0)),
   \+(\+(Var=1)).
 
+% If C is NOT an assumption, check if all supports are legit
+argument((C, Res)):-
+	\+(myAsm(C)),
+	myRule(C, List),
+	length(List, Len),
+	Len > 0,
+	check_support(List),
+	get_assumption(List, Res).
+
+% Check if all supports are legit
+% (including supports of supports, supports of supports of supports ....etc)
+check_support([]).
+
+check_support([H|T]):-
+	myAsm(H),
+	check_support(T).
+
+check_support([H|T]):-
+	\+(myAsm(H)),
+	myRule(H, List),
+  % This predicate go deeper in the supports of supports, and check
+   % all dependent supports are legit
+	check_support(List),
+	check_support(T).
+
+% Among all supports, this predicate collects only assumptions
+get_assumption([], []).
+get_assumption([H|T1], [H|T2]):-
+	myAsm(H),
+	get_assumption(T1,T2).
+
+get_assumption([H1|T1], T2):-
+	\+(myAsm(H1)),
+	member(H1, List),
+	get_assumption(C, T1,T2).
+
+
 attacks((C1, X1), (C2, X2)):-
 	argument((C1, X1)),
 	argument((C2, X2)),
@@ -102,3 +108,4 @@ attacks((C1, X1), (C2, X2)):-
 	argument((C2, X2)),
 	contrary(C1, A),
 	member(A, X2).
+	
