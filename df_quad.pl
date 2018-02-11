@@ -41,39 +41,18 @@ TODO: Tests/Issues
 4. Haven't tested different base score
 5. Very complicated trees (we can do this using http://www.arganddec.com/)
 
-TODO
-6: refactoring, better variable/predicate names
-7: Comments
-8: Singleton variables
-
-TODO: Minor issues
-
-1. If you look at strength predicate, there are lots of redundant code, so it might be worth
-   considering some refactoring (e.g conditional steatement etc).
-2. If you trace it, it goes through many steps (800 steps), mainly because of findall
-   and non-tail recursion. While the description tells us to avoid "obvious inefficiency",
-	 we could ask them whey they mean by that.
 */
 
-/*
+% combination function
 comb_func(V0, Va, Vs, C):-
 	(Va >= Vs -> C is (V0 - (V0 * abs((Vs - Va)))) ;
 	 C is (V0 + ((1 - V0) * (abs((Vs - Va)))))).
-*/
 
-comb_func(V0, Va, Vs, C):-
-	Va >= Vs,
-	C is (V0 - (V0 * abs((Vs - Va)))).
-
-comb_func(V0, Va, Vs, C):-
-	Va < Vs,
-	C is (V0 + ((1 - V0) * (abs((Vs - Va))))).
-
+% base function to handle sequences of strengths of attackers or supporters
 base_func(V1, V2, NewScore):-
 	NewScore is (V1 + ((1 - V1)* V2)).
 
-
-% When Arg has no child
+% When Arg has no child, simply returns the base case of Arg
 strength(Arg, BS):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 	length(Attackers, 0),
@@ -81,7 +60,7 @@ strength(Arg, BS):-
 	length(Supporters, 0),
 	base(Arg, BS).
 
-% When Arg has only supporter children and no attackers
+% When Arg has only supporter children and no attackers,
 strength(Arg, TotalScore):-
 	findall(Att, (argument(Att), attacks(Att,Arg)), Attackers),
 	length(Attackers, 0),
@@ -121,28 +100,32 @@ strength(Arg, TotalScore):-
 % Children: list of attackers or supporters children associated with Arg.
 strength_aggregation(Arg, Children, Score):- strength_aggregation(Arg, Children, Score, []).
 
-strength_aggregation(Arg, [], 0, ScoreList):-
+% If n = 0: F(S) = 0
+strength_aggregation(_, [], 0, ScoreList):-
 		length(ScoreList, 0).
 
-strength_aggregation(Arg, [], Score, ScoreList):-
+% If n = 1: F(S) = v1
+strength_aggregation(_, [], Score, ScoreList):-
 		length(ScoreList, 1),
 		[Score] = ScoreList.
 
-strength_aggregation(Arg, [], Score, ScoreList):-
+% If n = 2: F(S) = v(v1, v2)
+strength_aggregation(_, [], Score, ScoreList):-
 		length(ScoreList, 2),
 		[Score1, Score2] = ScoreList,
 		base_func(Score1, Score2, Score).
 
-strength_aggregation(Arg, [], Score, [Score1, Score2|Rest]):-
-		length([Score1, Score2|Rest], ListLen),
+% If n > 2: F(S) = 0: F(S) = f(F(v1.... vn-1), vn)
+% Take V1 and V2, calculate the score using base function,
+% which will be stored in the accumulator
+strength_aggregation(Arg, [], Score, [V1, V2|Rest]):-
+		length([V1, V2|Rest], ListLen),
 		ListLen > 2,
-		base_func(Score1, Score2, NewScore),
+		base_func(V1, V2, NewScore),
 		strength_aggregation(Arg, [], Score, [NewScore|Rest]).
 
-strength_aggregation(Arg, [], 0, ScoreList):-
-		length(ScoreList, 0).
-
-strength_aggregation(Arg, [Attacker|Rest], S, Acc):-
-    % TODO This is where the recursion takes place, but it doesn't work when multiple attackers and supporters are provided.
-		strength(Attacker, Score),
-		strength_aggregation(Arg, Rest, S, [Score|Acc]).
+% If n > 2: F(S) = 0: F(S) = f(F(v1.... vn-1), vn)
+% Calculate nth V
+strength_aggregation(Arg, [V1|Rest], S, Acc):-
+		strength(V1, TotalScore),
+		strength_aggregation(Arg, Rest, S, [TotalScore|Acc]).
