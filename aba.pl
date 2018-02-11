@@ -44,21 +44,11 @@ argument((C, [])):-
 	myRule(C, List),
 	length(List, 0).
 
-% % X has to be instantiated. If not, this predicate will be ignored
+% X has to be instantiated. If not, this predicate will be ignored
 argument((C, X)):-
 	\+(not_inst(X)),
 	check_support2(X, C),
 	myRule(C, X).
-
-check_support2([], C).
-check_support2([H|T], C):-
-	myRule(C, List),
-	member(H, List),
-	check_support2(T, C).
-
-not_inst(Var):-
-  \+(\+(Var=0)),
-  \+(\+(Var=1)).
 
 % If C is NOT an assumption, check if all supports are legit
 argument((C, Res)):-
@@ -68,6 +58,17 @@ argument((C, Res)):-
 	Len > 0,
 	check_support(List),
 	get_assumption(List, Res).
+
+
+check_support2([], _).
+check_support2([H|T], C):-
+	myRule(C, List),
+	member(H, List),
+	check_support2(T, C).
+
+not_inst(Var):-
+  \+(\+(Var=0)),
+  \+(\+(Var=1)).
 
 % Check if all supports are legit
 % (including supports of supports, supports of supports of supports ....etc)
@@ -91,6 +92,7 @@ get_assumption([H|T1], [H|T2]):-
 	myAsm(H),
 	get_assumption(T1,T2).
 
+% Does this make sense??
 get_assumption([H1|T1], T2):-
 	\+(myAsm(H1)),
 	member(H1, List),
@@ -108,4 +110,3 @@ attacks((C1, X1), (C2, X2)):-
 	argument((C2, X2)),
 	contrary(C1, A),
 	member(A, X2).
-	
