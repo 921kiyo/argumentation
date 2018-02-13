@@ -1,72 +1,40 @@
-/*
-argument(a).
-argument(b).
-argument(c).
-argument(d).
-argument(e).
-argument(f).
-argument(g).
-argument(h).
-argument(i).
-argument(j).
-argument(k).
-argument(l).
-argument(m).
-argument(n).
-argument(p).
-argument(q).
-    
-attacks(h,e).
-attacks(e,b).
-attacks(d,e).
-attacks(d,b).
-attacks(d,a).
-attacks(h,a).
-attacks(h,p).
-attacks(p,q).
-attacks(n,p).
-attacks(n,f).
-attacks(i,n).
-attacks(j,n).
-attacks(n,p).
-attacks(n,f).
-attacks(i,j).
-attacks(j,i).
-attacks(i,e).
-attacks(p,c).
-attacks(c,a).
-attacks(p,l).
-attacks(m,k).
-attacks(l,m).
-attacks(k,l).
-attacks(m,c).                                                                  
-attacks(g,d).
-attacks(g,p).
-*/
-/*
-argument(a).
-argument(b).
-argument(c).
-argument(d).
-argument(e).
-argument(f).
+/* Implementation of grounded(X). Note this predicate can only be used to
+   test whether a given argument (constant) is a member of the grounded extension, i.e. it
+   will not return members of the grounded extension if tested with an unground variable */
 
-attacks(b,a).
-attacks(d,c).
-attacks(c,a).
-attacks(e,d).
-attacks(f,b).
-*/
-
-
-% forall(X, Y), meaning there is no instantiation of X for which Y is false
+% pre-defined predicate forall(X, Y), meaning there is no instantiation of X for which Y is false
 forall(X, Y):- 
 	\+ (X, \+ Y).
 	
+% Grounded(A): where A is a member of the grounded extension
 grounded(A):- 
 	argument(A),
-	forall(attacks(B, A), (attacks(C, B), B \== C, A \== C, check_loops(B, C), grounded(C))).
+	forall(attacks(B, A),
+	       (argument(B), argument(C), attacks(C, B), B \== C, A \== C, check_loops(B, C), grounded(C))).
 
+% Second case of Grounded(A): [] is the grounded extension if there are no unattacked arguments
+grounded(A):-
+	A == [],
+	findall(X, argument(X), Args),
+	findall(X, (member(X, Args), attackers_list([X], Att), length(Att, 0)), Unattacked),
+	Unattacked == [].
+
+% auxillary predicate attackers_list(Def, Att): which returns a list of attackers (Att) which are
+% attacking Def (uses get_attackers(Def, Att, Acc) predicate to accumulate these attackers).
+attackers_list(Def, Att):-
+	get_attackers(Def, Att, []).
+
+get_attackers([], Acc, Acc).
+
+get_attackers([H|T], Att, Acc):-
+	findall([X,Y], attacks(X,Y), Attackers),
+	findall(X, member([X, H], Attackers), L),
+	append(Acc, L, NewAcc),
+	
+get_attackers(T, Att, NewAcc).
+
+% auxillary predicate check_loops(B, C): checks for (undecided) loops between arguments B and C
+% when confirming a member in the grounded extension
 check_loops(B, C):-
 	findall(X, attacks(B, X), Attacked_by_B),
 	findall(X, attacks(X, C), Attacking_C),
