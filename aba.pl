@@ -34,6 +34,14 @@
 % argument((C, [])):-
 % 	myRule(C, []).
 
+myAsm(c).
+myAsm(d).
+myAsm(w).
+myRule(b, [c,a]).
+myRule(a, [d]).
+myRule(p, [w]).
+contrary(d, p).
+
 % If C is an assumption, return itself
 argument((C, [C])):-
 	myAsm(C).
@@ -59,7 +67,6 @@ check_support2([H|T], C):-
 not_inst(Var):-
   \+(\+(Var=0)),
   \+(\+(Var=1)).
-
 % If C is NOT an assumption, check if all supports are legit
 argument((C, Res)):-
 	\+(myAsm(C)),
@@ -96,7 +103,6 @@ get_assumption([H1|T1], T2):-
 	member(H1, List),
 	get_assumption(C, T1,T2).
 
-
 attacks((C1, X1), (C2, X2)):-
 	argument((C1, X1)),
 	argument((C2, X2)),
@@ -108,4 +114,3 @@ attacks((C1, X1), (C2, X2)):-
 	argument((C2, X2)),
 	contrary(C1, A),
 	member(A, X2).
-	
