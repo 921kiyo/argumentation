@@ -11,14 +11,33 @@ argument(a8).
 
 % relationships
 
-supports(a7, a2).
-supports(a8, a4).
+% supports(a7, a2).
+% supports(a8, a4).
+%
+% attacks(a5,a3).
+% attacks(a6,a3).
+% attacks(a4,a2).
+% attacks(a3,a2).
+% attacks(a2,a1).
 
-attacks(a5,a3).
-attacks(a6,a3).
+% Example2
+% supports(a4, a2).
+% supports(a5, a2).
+% supports(a6, a2).
+%
+% attacks(a3,a2).
+% attacks(a2,a1).
+
+% Example3
+attacks(a7,a6).
+attacks(a6,a2).
+attacks(a5,a2).
 attacks(a4,a2).
 attacks(a3,a2).
 attacks(a2,a1).
+
+
+
 
 % base scores
 
@@ -29,7 +48,7 @@ base(a4, 0.5).
 base(a5, 0.5).
 base(a6, 0.5).
 base(a7, 0.5).
-base(a8, 0.5).
+% base(a8, 0.5).
 
 
 /*
@@ -39,7 +58,6 @@ TODO: Tests/Issues
 2. If no supports/2 is provided
 3. When there are more supporters than attackers
 4. Haven't tested different base score
-5. Very complicated trees (we can do this using http://www.arganddec.com/)
 
 */
 
@@ -77,7 +95,6 @@ strength(Arg, TotalScore):-
 	length(Attackers, Att_len),
 	Att_len > 0,
 	strength_aggregation(Arg, Attackers, AttScore),
-
 	findall(Supp, (argument(Supp), supports(Supp,Arg)), Supporters),
 	length(Supporters, 0),
 	base(Arg, BS),
