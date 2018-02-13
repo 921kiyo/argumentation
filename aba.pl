@@ -53,21 +53,33 @@ contrary(w, v).
 % contrary(b, s).
 % contrary(c, t).
 
+
+% myAsm(c).
+% myAsm(d).
+% myAsm(w).
+% myRule(b, [c,a]).
+% myRule(a, [d]).
+% myRule(p, [w]).
+% contrary(d, p).
+
+% If C is an assumption, return itself
+argument((C, [C])):-
+	myAsm(C).
+
 % If C is not an assumption, and support is empty, return empty set.
 argument((C, [])):-
 	myRule(C, []),
 	\+(myAsm(C)).
 
-argument((C, Assumptions)):-
+
+% If C is NOT an assumption, check if all supports are legit
+argument((C, Res)):-
+	\+(myAsm(C)),
 	myRule(C, List),
 	length(List, Len),
 	Len > 0,
 	check_support(List),
 	get_assumption(List, Assumptions).
-
-% If C is an assumption, return itself
-argument((C, [C])):-
-	myAsm(C).
 
 % Check if all supports are legit
 % (including supports of supports, supports of supports of supports ....etc)
@@ -83,8 +95,8 @@ check_support([H|T]):-
   % This predicate go deeper in the supports of supports, and check
    % all dependent supports are legit
 	check_support(List),
-	check_support(T).
 
+	check_support(T).
 % Among all supports, this predicate collects only assumptions
 get_assumption([], []).
 get_assumption([H|T1], [H|T2]):-
