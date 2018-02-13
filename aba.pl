@@ -71,10 +71,8 @@ argument((C, [])):-
 	myRule(C, []),
 	\+(myAsm(C)).
 
-
 % If C is NOT an assumption, check if all supports are legit
-argument((C, Res)):-
-	\+(myAsm(C)),
+argument((C, Assumptions)):-
 	myRule(C, List),
 	length(List, Len),
 	Len > 0,
@@ -95,8 +93,8 @@ check_support([H|T]):-
   % This predicate go deeper in the supports of supports, and check
    % all dependent supports are legit
 	check_support(List),
-
 	check_support(T).
+
 % Among all supports, this predicate collects only assumptions
 get_assumption([], []).
 get_assumption([H|T1], [H|T2]):-
