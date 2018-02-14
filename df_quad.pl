@@ -24,17 +24,19 @@ argument(a8).
 % supports(a4, a2).
 % supports(a5, a2).
 % supports(a6, a2).
-%
+
+supports(xxxxxx,xxxxxx).
+attacks(xxxxxx,xxxxxx).
 % attacks(a3,a2).
-% attacks(a2,a1).
+% attacks(a3,a1).
 
 % Example3
-attacks(a7,a6).
-attacks(a6,a2).
-attacks(a5,a2).
-attacks(a4,a2).
-attacks(a3,a2).
-attacks(a2,a1).
+% attacks(a7,a6).
+% attacks(a6,a2).
+% attacks(a5,a2).
+% attacks(a4,a2).
+% attacks(a3,a2).
+% attacks(a2,a1).
 
 
 
